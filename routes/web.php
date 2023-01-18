@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 // use App\Http\Controllers\FilesController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,5 +20,12 @@ Route::get('/', function () {
 });
 
 Auth::routes();
+
+Route::get('/user', [UserController::class, 'show'])->name('user_profile')->middleware('auth');
+
+Route::group(['middleware' => ['web', 'auth']], function() {
+    Route::get('/user', [UserController::class, 'show'])->name('user_profile');
+    Route::post('/user', [UserController::class, 'update'])->name('user_profile_update');
+});
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

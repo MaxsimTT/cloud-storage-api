@@ -15,12 +15,12 @@ use App\Http\Controllers\FilesController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-// Route::group(['middleware' => 'auth:sanctum'], function() {
-//     Route::get('/files', [FilesController::class, 'show']);
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
 // });
 
-Route::get('/files', [FilesController::class, 'show']);
+Route::group(['middleware' => 'auth:sanctum'], function() {
+    Route::get('/test', [FilesController::class, 'show']);
+});
+
+Route::get('/user', [FilesController::class, 'showUser']);
