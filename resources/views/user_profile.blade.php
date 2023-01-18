@@ -51,6 +51,10 @@
                                 @error('name')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
 
                         <div class="row mb-0">
                             <div class="col-md-8 offset-md-4">
@@ -60,12 +64,36 @@
 
                             </div>
                         </div>
+                    </form>
 
-                        <a class="btn btn-link" href="{{ route('password.request') }}">
-                            {{ __('Forgot Your Password?') }}
-                        </a>
+                    <form  class="p-2" method="POST" action="@if ($user->tokens->first()){{ route('usergeltoken') }}@else{{ route('usersettoken') }}@endif">
+                        @csrf
+
+                        <div class="row mb-3">
+                            <label for="token" class="col-md-4 col-form-label text-md-end">{{ __('Token') }}</label>
+
+                            <div class="col-md-6">
+                                <input id="token" type="text" class="form-control" name="token" value="@if ($user->tokens->first()){{ $user->tokens->first()->token }}@endif"  autocomplete="token" readonly autofocus>
+                            </div>
+                        </div>
+
+                        <div class="row mb-0">
+                            <div class="col-md-8 offset-md-4">
+                                <button type="submit" class="btn @if ($user->tokens->first()) btn-danger @else btn-primary @endif">
+                                    @if ($user->tokens->first())
+                                        {{ __('Delete personal token') }}
+                                    @else
+                                        {{ __('Generate personal token') }}
+                                    @endif
+                                </button>
+                            </div>
+                        </div>  
 
                     </form>
+
+                    <a class="btn btn-link" href="{{ route('password.request') }}">
+                        {{ __('Forgot Your Password?') }}
+                    </a>
                 </div>
             </div>
         </div>
