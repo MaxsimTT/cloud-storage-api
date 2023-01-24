@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 // use App\Http\Controllers\FilesController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\FileController;
 use Illuminate\Http\Request;
 
 /*
@@ -44,6 +45,9 @@ Route::group(['middleware' => ['web', 'auth']], function() {
         }
         return redirect()->route('user_profile');
     })->name('usergeltoken');
+
+    Route::get('/files', [FileController::class, 'getFiles'])->name('get_files');
+    Route::post('/files', [FileController::class, 'addFiles'])->name('add_file');
 });
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
