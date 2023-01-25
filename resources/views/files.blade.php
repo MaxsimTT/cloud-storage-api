@@ -34,10 +34,9 @@
                 	<div class="modal-content">
                 		<span class="close">&times;</span>
 						<div class="mb-3">
-						<form method="POST" action="{{ route('add_file') }}">
+						<form enctype="multipart/form-data" method="POST" action="{{ route('add_file') }}">
 							@csrf
-						  	<label for="formFile" class="form-label">Default file input example</label>
-						  	<input class="form-control" type="file" id="formFile">
+						  	<input class="form-control" type="file" id="formFile" name="files[]" multiple>
 						  	<button type="submit" class="btn btn-primary mt-4">{{ __('Send') }}</button>
 						</form>
 						</div>
