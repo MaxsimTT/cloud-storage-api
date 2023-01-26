@@ -46,7 +46,7 @@ Route::group(['middleware' => ['web', 'auth']], function() {
         return redirect()->route('user_profile');
     })->name('usergeltoken');
 
-    Route::get('/files', [FileController::class, 'getFiles'])->name('get_files');
+    Route::get('/files/{dir?}', [FileController::class, 'getFiles'])->name('get_files');
     Route::post('/files', [FileController::class, 'addFiles'])->name('add_file');
 });
 

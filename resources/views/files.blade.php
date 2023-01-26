@@ -9,7 +9,7 @@
                 <div class="card-header">
 				    <ul class="nav justify-content-end">
 					  <li class="nav-item">
-					    <a class="nav-link add-file"  href="#">{{ __('Add file') }}</a>
+					    <a class="nav-link add-file" >{{ __('Add file') }}</a>
 					  </li>
 					  <li class="nav-item">
 					    <a class="nav-link" href="#">Link</a>

@@ -7,7 +7,7 @@ class FileValidationClass
 
 	public static array $files;
 
-	public static function validation(array $files)
+	public static function validation(array $files, array $validation_params): array
 	{
 
 		$res = [];
@@ -18,15 +18,18 @@ class FileValidationClass
 				continue;
 			}
 
-			if (strtolower(substr(strrchr($file['name'], '.'), 1)) === 'php') {
+			if (in_array(strtolower(substr(strrchr($file['name'], '.'), 1)), $validation_params['except_extensions'])) {
+				continue;
+			}
+
+			if ($file['size'] > $validation_params['max_size']) {
 				continue;
 			}
 
 			$res[] = $file;
 		}
 
-		dump($res);
-		// return self::$files;
+		return $res;
 	}
 
 	private static function arr(array $files): array
