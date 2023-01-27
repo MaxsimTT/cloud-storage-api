@@ -12,6 +12,7 @@ class FileDescription extends Model
     protected $fillable = [
         'file_id',
         'file_name',
+        'file_origin_name',
     ];
 
     public function user() {

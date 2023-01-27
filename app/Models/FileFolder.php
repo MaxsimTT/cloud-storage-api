@@ -19,7 +19,7 @@ class FileFolder extends Model
 
     public function forder_description()
     {
-        return $this->hasOne('App\Models\FileFolderDescription');
+        return $this->hasOne('App\Models\FileFolderDescription', 'folder_id');
     }
 
 
