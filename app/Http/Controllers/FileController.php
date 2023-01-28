@@ -32,9 +32,7 @@ class FileController extends Controller
 
         $files = $user->files()->where('folder_id', $dir_id)->get();
 
-        dump($files);
-
-        return view('files');
+        return view('files', ['files' => $files]);
     }
 
     public function addFiles(Request $request)
@@ -81,7 +79,8 @@ class FileController extends Controller
                 $alias_name = DFileHelperClass::getRandomFileName($dir_path, $file['name']);
 
                 $files[$key]['alias_name'] = $alias_name;
-                $files[$key]['file_path'] = $dir_path . '\\' . $alias_name;
+                $files[$key]['file_path'] = asset("storage/{$dir_id}/{$alias_name}");
+                $files[$key]['file_mv_to'] = $dir_path . '\\' . $alias_name;
             }
 
             $result = self::uploadFile($files, $user, $dir_id);
@@ -172,7 +171,7 @@ class FileController extends Controller
         foreach ($files_data as $key => $file_data) {
 
             $result_uploading[$key] = [
-                'result' => move_uploaded_file($file_data['tmp_name'], $file_data['file_path']),
+                'result' => move_uploaded_file($file_data['tmp_name'], $file_data['file_mv_to']),
                 'name_file' => $file_data['name'],
                 'type_file' => $file_data['type'],
             ];

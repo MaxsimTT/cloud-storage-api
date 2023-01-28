@@ -28,6 +28,15 @@
                     @endif
 
                     {{ __('You are logged in!') }}
+
+                    @foreach ($files as $file)
+                    	@if ($file)
+                    		<div>
+                    			<a href="{{ $file->file_path }}">{{ $file->file_description->file_origin_name }}</a>                  		
+                    		</div>
+                    	@endif
+                    @endforeach
+
                 </div>
 
                 <div class="modal">
