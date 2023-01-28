@@ -24,9 +24,16 @@ class FileController extends Controller
         //
     }
 
-    public function getFiles(Request $request)
+    public function getFiles(Request $request, $dir_id = '')
     {
-        // dump($request->user());
+        
+        $user = $request->user();
+        $dir_id = (int) $dir_id ? (int) $dir_id : self::getRootDirId($user);
+
+        $files = $user->files()->where('folder_id', $dir_id)->get();
+
+        dump($files);
+
         return view('files');
     }
 
@@ -79,6 +86,15 @@ class FileController extends Controller
 
             $result = self::uploadFile($files, $user, $dir_id);
 
+            $error_upload_files = [];
+            foreach ($result as $key => $file) {
+                if ($file['result'] === false) {
+                    $error_upload_files[] = $file;
+                    unset($result[$key]);
+                }
+            }
+
+            return redirect()->route('get_files'/*, ['error_upload_files' => $error_upload_files, 'success_upload_files' => $result]*/);
         }
     }
 
@@ -119,7 +135,7 @@ class FileController extends Controller
         return $dir_id;
     }
 
-    private static function uploadFile(array $files_data, User $user, int $dir_id)
+    private static function uploadFile(array $files_data, User $user, int $dir_id): array
     {
 
         $data = [];
@@ -151,9 +167,17 @@ class FileController extends Controller
             return throw new \Exception("Error Processing Request", 1);
         }
 
-        foreach ($files_data as $file_data) {
-            dump($file_data);
-            move_uploaded_file($file_data['tmp_name'], $file_data['file_path']);
+        $result_uploading = [];
+
+        foreach ($files_data as $key => $file_data) {
+
+            $result_uploading[$key] = [
+                'result' => move_uploaded_file($file_data['tmp_name'], $file_data['file_path']),
+                'name_file' => $file_data['name'],
+                'type_file' => $file_data['type'],
+            ];
         }
+
+        return $result_uploading;
     }
 }
