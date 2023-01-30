@@ -2,6 +2,8 @@
 
 namespace App\Http\Classes;
 
+use Storage;
+
 class FileValidationClass
 {
 
@@ -12,17 +14,17 @@ class FileValidationClass
 
 		$res = [];
 
-		foreach (self::arr($files) as $file) {
+		foreach ($files as $file) {
 
-			if ($file['error']) {
+			if (! $file->isValid()) {
 				continue;
 			}
 
-			if (in_array(strtolower(substr(strrchr($file['name'], '.'), 1)), $validation_params['except_extensions'])) {
+			if (in_array($file->getClientOriginalExtension(), $validation_params['except_extensions'])) {
 				continue;
 			}
 
-			if ($file['size'] > $validation_params['max_size']) {
+			if ($file->getSize() > $validation_params['max_size'] || $file->getSize() > $file->getMaxFilesize()) {
 				continue;
 			}
 
@@ -31,21 +33,4 @@ class FileValidationClass
 
 		return $res;
 	}
-
-	private static function arr(array $files): array
-	{
-		$res_files = [];
-
-		$files_count = count($files['name']);
-		$file_attrs = array_keys($files);
-
-		for ($i = 0; $i < $files_count; $i++) {
-			foreach ($file_attrs as $file_attr) {
-				$res_files[$i][$file_attr] = $files[$file_attr][$i];
-			}
-		}
-
-		return $res_files;
-	}
-
 }

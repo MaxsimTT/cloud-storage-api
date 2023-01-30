@@ -39,17 +39,10 @@ class FileController extends Controller
     {
         if ($request->isMethod('post')) {
 
-            $user = $request->user();
+            $files = $request->file();
 
-            $dir_root = self::getRootDirId($user);
-
-            $path = storage_path("app\public\\{$dir_root}");
-            $dir_path = $request->query('dir_id') ? $path . '\\' . $request->query('dir_id') : $path;
-            $dir_id = substr(strrchr($dir_path, '\\'), 1);
-
-            if (! FileFolder::find($dir_id)) {
-                $dir_id = $dir_root;
-                $dir_path = $path;
+            if (! $files) {
+                return redirect()->route('get_files')->with(['message' => 'Empty array with files']);
             }
 
             $validation_params = [
@@ -60,56 +53,32 @@ class FileController extends Controller
                 'except_type' => [],
             ];
 
-            $files_post = $_FILES;
+            $count_upload_files = 0;
 
-            foreach ($files_post as $files) {
-                $files = FileValidationClass::validation($files, $validation_params);
+            foreach ($files as $files_data) {
+                $count_upload_files += count($files_data);
+                $files = FileValidationClass::validation($files_data, $validation_params);
             }
 
-            if (! $files) {
-                return redirect()->route('get_files');
-            }
+            $user = $request->user();
 
-            if (! self::createDirUploadFiles($dir_path)) {
-                return redirect()->route('get_files');
-            }
+            $dir_root = self::getRootDirId($user);
+            $dir_id = $request->query('dir_id') ? $request->query('dir_id') : $dir_root;
 
-            foreach ($files as $key => $file) {
-
-                $alias_name = DFileHelperClass::getRandomFileName($dir_path, $file['name']);
-
-                $files[$key]['alias_name'] = $alias_name;
-                $files[$key]['file_path'] = asset("storage/{$dir_id}/{$alias_name}");
-                $files[$key]['file_mv_to'] = $dir_path . '\\' . $alias_name;
+            if (! FileFolder::find($dir_id)) {
+                $dir_id = $dir_root;
             }
 
             $result = self::uploadFile($files, $user, $dir_id);
+            $success_upload_files = count($result);
+            $feils_upload_files = $count_upload_files - $success_upload_files;
 
-            $error_upload_files = [];
-            foreach ($result as $key => $file) {
-                if ($file['result'] === false) {
-                    $error_upload_files[] = $file;
-                    unset($result[$key]);
-                }
-            }
-
-            return redirect()->route('get_files'/*, ['error_upload_files' => $error_upload_files, 'success_upload_files' => $result]*/);
+            return redirect()->route('get_files')->with(['message' => "Success upload files {$success_upload_files} \ feils {$feils_upload_files}"]);
         }
-    }
-
-    private static function createDirUploadFiles($dir_path): bool
-    {
-        if (!is_dir($dir_path)) {
-            if (!mkdir($dir_path, 0777, true)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private static function findingRootFolder(User $user): int|bool
     {
-        $folders_name = [];
 
         foreach ($user->folders as $folder) {
             if (isset($folder->forder_description->folder_name) && $folder->forder_description->folder_name == 'root') {
@@ -136,47 +105,50 @@ class FileController extends Controller
 
     private static function uploadFile(array $files_data, User $user, int $dir_id): array
     {
+        $result = [];
+        $data_files = [];
+        $data_files_desc = [];
 
-        $data = [];
-        foreach ($files_data as $file_data) {
-            $data[] = new File([
-                'user_id' => $user->id,
-                'folder_id' => $dir_id,
-                'file_path' => $file_data['file_path'],
-                'file_size' => $file_data['size'],
-            ]);
-        }
+        foreach ($files_data as $file) {
+            $path = $file->store("user-files/{$dir_id}");
+            if ($path) {
 
-        $result = $user->files()->saveMany($data);
+                $data_files[] = new File([
+                    'user_id' => $user->id,
+                    'folder_id' => $dir_id,
+                    'file_path' => $path,
+                    'file_size' => $file->getSize(),
+                ]);
 
-        $data = [];
-        foreach ($result as $res_file) {
-            foreach ($files_data as $file_data) {
-                if ($res_file['file_path'] == $file_data['file_path']) {
-                    $data[] = [
-                        'file_id' => $res_file->id,
-                        'file_name' => $file_data['alias_name'],
-                        'file_origin_name' => $file_data['name'],
-                    ];
-                }
+                $data_files_desc[] = [
+                    'file_name' => $file->getClientOriginalName(),
+                    'file_path' => $path,
+                ];
             }
         }
-        
-        if (! DB::table('file_descriptions')->insert($data)) {
-            return throw new \Exception("Error Processing Request", 1);
+
+        $result = $user->files()->saveMany($data_files);
+
+        if ($user->files()->saveMany($data_files)) {
+            $result = $user->files()->saveMany($data_files);
+
+            foreach ($result as $res_file) {
+                foreach ($data_files_desc as $key => $file_data) {
+                    if ($res_file['file_path'] == $file_data['file_path']) {
+                        $data_files_desc[$key]['file_id'] = $res_file->id;
+                    }
+                }
+            }
+
+            foreach ($data_files_desc as $key => $file_data) {
+                unset($data_files_desc[$key]['file_path']);
+            }
+
+            if (! DB::table('file_descriptions')->insert($data_files_desc)) {
+                return throw new \Exception("Error Processing Request", 1);
+            }
         }
 
-        $result_uploading = [];
-
-        foreach ($files_data as $key => $file_data) {
-
-            $result_uploading[$key] = [
-                'result' => move_uploaded_file($file_data['tmp_name'], $file_data['file_mv_to']),
-                'name_file' => $file_data['name'],
-                'type_file' => $file_data['type'],
-            ];
-        }
-
-        return $result_uploading;
+        return $result;
     }
 }

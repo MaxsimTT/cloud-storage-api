@@ -2,8 +2,16 @@
 
 @section('content')
 <div class="container">
+
     <div class="row justify-content-center">
         <div class="col-md-10">
+
+			@if (session('message'))
+			    <div class="alert alert-success">
+			        {{ session('message') }}
+			    </div>
+			@endif
+
             <div class="card">
 
                 <div class="card-header">
@@ -32,7 +40,7 @@
                     @foreach ($files as $file)
                     	@if ($file)
                     		<div>
-                    			<a href="{{ $file->file_path }}">{{ $file->file_description->file_origin_name }}</a>                  		
+                    			<a href="{{ $file->file_path }}">{{ $file->file_description->file_name }}</a>                  		
                     		</div>
                     	@endif
                     @endforeach
