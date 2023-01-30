@@ -20,7 +20,7 @@
 					    <a class="nav-link add-file" >{{ __('Add file') }}</a>
 					  </li>
 					  <li class="nav-item">
-					    <a class="nav-link" href="#">Link</a>
+					    <a class="nav-link create-folder" >{{ __('Create folder') }}</a>
 					  </li>
 					  <li class="nav-item">
 					    <a class="nav-link disabled">Disabled</a>
@@ -56,6 +56,23 @@
 						  	<input class="form-control" type="file" id="formFile" name="files[]" multiple>
 						  	<button type="submit" class="btn btn-primary mt-4">{{ __('Send') }}</button>
 						</form>
+						</div>
+					</div>
+				</div>
+
+				<div class="modal-2">
+                	<div class="modal-content">
+                		<span class="close">&times;</span>
+						<div class="mb-3">
+							<form method="POST" action="{{ route('create_folder') }}">
+								@csrf
+								<div class="mb-3">
+									<label for="create-folder" class="form-label">{{ __('Name folder') }}</label>
+									<input type="text" class="form-control" id="create-folder" aria-describedby="emailHelp" name="create-folde">
+									<div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+								</div>
+								<button type="submit" class="btn btn-primary">Submit</button>
+							</form>
 						</div>
 					</div>
 				</div>

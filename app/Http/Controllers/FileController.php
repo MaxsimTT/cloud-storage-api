@@ -9,10 +9,14 @@ use App\Models\FileFolder;
 use App\Models\User;
 use App\Models\File;
 use App\Models\FileDescription;
+use App\Http\Traits\FolderTrait;
 use DB;
 
 class FileController extends Controller
 {
+
+    use FolderTrait;
+
     /**
      * Handle the incoming request.
      *
@@ -75,32 +79,6 @@ class FileController extends Controller
 
             return redirect()->route('get_files')->with(['message' => "Success upload files {$success_upload_files} \ feils {$feils_upload_files}"]);
         }
-    }
-
-    private static function findingRootFolder(User $user): int|bool
-    {
-
-        foreach ($user->folders as $folder) {
-            if (isset($folder->forder_description->folder_name) && $folder->forder_description->folder_name == 'root') {
-                return $folder->forder_description->folder_id;
-            }
-        }
-
-        return false;
-    }
-
-    private static function getRootDirId(User $user): int
-    {
-        $dir_id = self::findingRootFolder($user);
-        if ($dir_id == false) {
-            $dir_id = $user->folders()->insertGetId(['user_id' => $user->id]);
-            $result = DB::table('file_folder_descriptions')->insert(['folder_id' => $dir_id, 'folder_name' => 'root']);
-            if (! $result) {
-                return throw new \Exception("Error Processing Request", 1);
-            }
-        }
-
-        return $dir_id;
     }
 
     private static function uploadFile(array $files_data, User $user, int $dir_id): array

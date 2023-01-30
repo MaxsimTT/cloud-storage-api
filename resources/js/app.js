@@ -7,3 +7,11 @@ $(".add-file").on("click", function () {
 $(".close").on("click", function () {
 	$(".modal").fadeOut();
 });
+
+$(".create-folder").on("click", function () {
+  	$(".modal-2").fadeIn();
+});
+
+$(".close").on("click", function () {
+	$(".modal-2").fadeOut();
+});

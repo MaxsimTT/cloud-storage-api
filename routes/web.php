@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 // use App\Http\Controllers\FilesController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\FolderController;
 use Illuminate\Http\Request;
 
 /*
@@ -48,6 +49,8 @@ Route::group(['middleware' => ['web', 'auth']], function() {
 
     Route::get('/files/{dir?}', [FileController::class, 'getFiles'])->name('get_files');
     Route::post('/files', [FileController::class, 'addFiles'])->name('add_file');
+
+    Route::post('/folder/create', [FolderController::class, 'createFolder'])->name('create_folder');
 });
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
