@@ -32,11 +32,18 @@ class FileController extends Controller
     {
         
         $user = $request->user();
-        $dir_id = (int) $dir_id ? (int) $dir_id : self::getRootDirId($user);
+
+        $dir_id = ! $request->filled('dir_id') ? self::getRootDirId($user) : (int) $request->query('dir_id');
 
         $files = $user->files()->where('folder_id', $dir_id)->get();
 
-        return view('files', ['files' => $files]);
+        $folders = $user->folders;
+
+        return view('files', [
+            'files'   => $files,
+            'dir_id'  => $dir_id,
+            'folders' => $folders,
+        ]);
     }
 
     public function addFiles(Request $request)
@@ -73,22 +80,24 @@ class FileController extends Controller
                 $dir_id = $dir_root;
             }
 
-            $result = self::uploadFile($files, $user, $dir_id);
+            $path = $dir_id == $dir_root ? (string) $dir_root : $dir_root . '\\' . $dir_id;
+
+            $result = self::uploadFile($files, $user, $dir_id, $path);
             $success_upload_files = count($result);
             $feils_upload_files = $count_upload_files - $success_upload_files;
 
-            return redirect()->route('get_files')->with(['message' => "Success upload files {$success_upload_files} \ feils {$feils_upload_files}"]);
+            return redirect()->route('get_files', ['dir_id' => $dir_id])->with(['message' => "Success upload files {$success_upload_files} \ feils {$feils_upload_files}"]);
         }
     }
 
-    private static function uploadFile(array $files_data, User $user, int $dir_id): array
+    private static function uploadFile(array $files_data, User $user, int $dir_id, string $path_to): array
     {
         $result = [];
         $data_files = [];
         $data_files_desc = [];
 
         foreach ($files_data as $file) {
-            $path = $file->store("user-files/{$dir_id}");
+            $path = $file->store("user-files/{$path_to}");
             if ($path) {
 
                 $data_files[] = new File([

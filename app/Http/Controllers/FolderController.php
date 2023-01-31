@@ -40,6 +40,10 @@ class FolderController extends Controller
         
         $res_create_dir = Storage::makeDirectory("user-files\\{$root_dir}\\{$dir->id}");
 
-        dump($res_create_dir);
+        if (! $res_create_dir) {
+            return redirect()->route('get_files')->with(['message' => "New folder <{$dir_name}> didn\'t create"]);
+        }
+
+        return redirect()->route('get_files', ['dir_id' => $dir->id])->with(['message' => "Success create folder <{$dir_name}>"]);
     }
 }
